@@ -1,0 +1,79 @@
+.import-tabs {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--border-soft);
+  margin-bottom: 22px;
+}
+
+.import-tabs button {
+  border: none;
+  background: none;
+  color: var(--fg-dim);
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  font-size: 0.92rem;
+}
+
+.import-tabs button.active {
+  color: var(--fg);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+.drop-card {
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 40px;
+  text-align: center;
+  background: var(--bg-elev);
+}
+
+.drop-card .big {
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+}
+
+.drop-card p {
+  color: var(--fg-dim);
+  margin: 6px 0 18px;
+}
+
+.import-results {
+  margin-top: 22px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.import-results .res {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.import-results .res:last-child {
+  border-bottom: none;
+}
+
+.import-results .res .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.import-results .res .dot.ok {
+  background: var(--good);
+}
+
+.import-results .res .dot.err {
+  background: var(--danger);
+}
+
+.sample-note {
+  color: var(--fg-dim);
+  font-size: 0.85rem;
+  margin-top: 10px;
+}
