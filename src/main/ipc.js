@@ -1,4 +1,4 @@
-import { ipcMain, dialog, BrowserWindow } from 'electron'
+import { ipcMain, dialog, shell, BrowserWindow } from 'electron'
 import fs from 'node:fs/promises'
 import * as cheerio from 'cheerio'
 import { IPC } from '../shared/ipc.js'
@@ -58,6 +58,8 @@ async function createFromPayload(payload) {
 
 export function registerIpc() {
   ipcMain.handle(IPC.ping, () => 'pong')
+  ipcMain.handle(IPC.appLibraryPath, () => store.libraryRoot())
+  ipcMain.handle(IPC.appOpenLibraryFolder, () => shell.openPath(store.libraryRoot()))
 
   // ---- Library / books ----
   ipcMain.handle(IPC.libraryList, () => store.listLibrary())

@@ -1,6 +1,8 @@
 // Central list of IPC channel names, shared by main + preload so they never drift.
 export const IPC = {
   ping: 'app:ping',
+  appOpenLibraryFolder: 'app:openLibraryFolder',
+  appLibraryPath: 'app:libraryPath',
 
   libraryList: 'library:list',
   libraryRebuild: 'library:rebuild',

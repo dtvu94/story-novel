@@ -9,9 +9,19 @@ import { DEFAULT_SETTINGS } from '../shared/reader-themes.js'
 
 // ---- Paths --------------------------------------------------------------
 
+// Data lives in a `data/` folder next to the app — NOT under %APPDATA% on C:.
+//   dev       -> <project root>/data/library
+//   packaged  -> <folder containing the .exe>/data/library
+//   override  -> STORY_SHELF_DATA env var (absolute path to the library folder)
+function resolveRoot() {
+  if (process.env.STORY_SHELF_DATA) return process.env.STORY_SHELF_DATA
+  const base = app.isPackaged ? dirname(app.getPath('exe')) : process.cwd()
+  return join(base, 'data', 'library')
+}
+
 let ROOT
 function paths() {
-  if (!ROOT) ROOT = join(app.getPath('userData'), 'library')
+  if (!ROOT) ROOT = resolveRoot()
   return {
     root: ROOT,
     index: join(ROOT, 'index.json'),
@@ -22,6 +32,11 @@ function paths() {
     bookFile: (id) => join(ROOT, 'books', id, 'book.json'),
     bookAssets: (id) => join(ROOT, 'books', id, 'assets')
   }
+}
+
+/** Absolute path to the library root folder (where all books live). */
+export function libraryRoot() {
+  return paths().root
 }
 
 function safeName(s) {

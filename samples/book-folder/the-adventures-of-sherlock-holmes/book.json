@@ -1,0 +1,22 @@
+{
+  "_format": "story-shelf-book@1",
+  "title": "The Adventures of Sherlock Holmes",
+  "author": "Arthur Conan Doyle",
+  "description": "Selected cases of the celebrated consulting detective of Baker Street.",
+  "tags": [
+    "classic",
+    "mystery",
+    "public-domain"
+  ],
+  "cover": "assets/cover.svg",
+  "source": {
+    "type": "sample"
+  },
+  "chapters": [
+    {
+      "title": "A Scandal in Bohemia",
+      "order": 0,
+      "markdown": "To Sherlock Holmes she is always *the* woman. I have seldom heard him mention her under any other name. In his eyes she eclipses and predominates the whole of her sex.\n\nIt was not that he felt any emotion akin to love for Irene Adler. All emotions, and that one particularly, were abhorrent to his cold, precise but admirably balanced mind. He was, I take it, the most perfect reasoning and observing machine that the world has seen.\n\n> \"You see, but you do not observe. The distinction is clear.\"\n\nAnd so it was that I found myself, one night in the spring, drawn once more into the affairs of my remarkable friend."
+    }
+  ]
+}

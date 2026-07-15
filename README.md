@@ -12,17 +12,21 @@ Built with Electron + React. Your library is plain files on your own machine.
 
 ## Data model — portable, atomic books
 
-Everything lives under your OS user-data folder (`…/Story Shelf/library/`):
+Everything lives in a `data/` folder **next to the app** (dev: project root; packaged:
+next to the `.exe`) — not under `%APPDATA%` on C:. Override with the `STORY_SHELF_DATA`
+env var (absolute path to the library folder).
 
 ```
-library/
-  index.json          catalog (fast to load)
-  settings.json       reader + app preferences
-  state.json          per-book reading progress & bookmarks
-  books/
-    <bookId>/
-      book.json        the book: metadata + chapters (Markdown)
-      assets/          cover + chapter images as REAL image files
+data/
+  app/                 Electron's own caches (kept off C: too)
+  library/
+    index.json         catalog (fast to load)
+    settings.json      reader + app preferences
+    state.json         per-book reading progress & bookmarks
+    books/
+      <bookId>/
+        book.json       the book: metadata + chapters (Markdown)
+        assets/         cover + chapter images as REAL image files
 ```
 
 Each **book is a self-contained folder**. To move a book to another PC, copy its folder

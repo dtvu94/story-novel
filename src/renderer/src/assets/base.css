@@ -402,10 +402,19 @@ a {
   pointer-events: none;
 }
 
-.card-edit {
+.card-actions {
   position: absolute;
   bottom: 8px;
   right: 8px;
+  display: none;
+  gap: 6px;
+}
+
+.book-card:hover .card-actions {
+  display: flex;
+}
+
+.card-action {
   width: 32px;
   height: 32px;
   border-radius: 8px;
@@ -414,17 +423,18 @@ a {
   backdrop-filter: blur(4px);
   color: #fff;
   cursor: pointer;
-  display: none;
+  display: grid;
   place-items: center;
 }
 
-.book-card:hover .card-edit {
-  display: grid;
-}
-
-.card-edit:hover {
+.card-action:hover {
   background: var(--accent);
   color: var(--accent-fg);
+}
+
+.card-action.danger:hover {
+  background: var(--danger);
+  color: #fff;
 }
 
 .badge {

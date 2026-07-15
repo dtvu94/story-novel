@@ -2,7 +2,7 @@ import { coverUrl } from '../lib/cover'
 import { formatCount } from '../lib/format'
 import Icon from './Icon'
 
-export function BookCard({ entry, onOpen, onEdit }) {
+export function BookCard({ entry, onOpen, onEdit, onDelete }) {
   const cover = coverUrl(entry.id, entry.cover)
   return (
     <div className="book-card" onClick={() => onOpen(entry)}>
@@ -16,18 +16,32 @@ export function BookCard({ entry, onOpen, onEdit }) {
           <span className="badge">{entry.chapterCount} ch</span>
           {entry.source?.type === 'import-web' && <span className="badge">web</span>}
         </div>
-        {onEdit && (
-          <button
-            className="card-edit"
-            title="Edit in Studio"
-            onClick={(e) => {
-              e.stopPropagation()
-              onEdit(entry)
-            }}
-          >
-            <Icon name="edit" size={15} />
-          </button>
-        )}
+        <div className="card-actions">
+          {onEdit && (
+            <button
+              className="card-action"
+              title="Edit in Studio"
+              onClick={(e) => {
+                e.stopPropagation()
+                onEdit(entry)
+              }}
+            >
+              <Icon name="edit" size={15} />
+            </button>
+          )}
+          {onDelete && (
+            <button
+              className="card-action danger"
+              title="Delete book"
+              onClick={(e) => {
+                e.stopPropagation()
+                onDelete(entry)
+              }}
+            >
+              <Icon name="trash" size={15} />
+            </button>
+          )}
+        </div>
       </div>
       <div className="meta">
         <div className="title">{entry.title}</div>
@@ -39,7 +53,7 @@ export function BookCard({ entry, onOpen, onEdit }) {
   )
 }
 
-export function BookRow({ entry, onOpen, onEdit }) {
+export function BookRow({ entry, onOpen, onEdit, onDelete }) {
   const cover = coverUrl(entry.id, entry.cover)
   return (
     <div className="book-row" onClick={() => onOpen(entry)}>
@@ -71,6 +85,18 @@ export function BookRow({ entry, onOpen, onEdit }) {
           }}
         >
           <Icon name="edit" size={16} />
+        </button>
+      )}
+      {onDelete && (
+        <button
+          className="icon-btn"
+          title="Delete book"
+          onClick={(e) => {
+            e.stopPropagation()
+            onDelete(entry)
+          }}
+        >
+          <Icon name="trash" size={16} />
         </button>
       )}
     </div>

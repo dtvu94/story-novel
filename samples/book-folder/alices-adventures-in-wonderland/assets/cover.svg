@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="600" viewBox="0 0 400 600">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#7c9cf5"/><stop offset="1" stop-color="#b98cf0"/>
+  </linearGradient></defs>
+  <rect width="400" height="600" fill="url(#g)"/>
+  <foreignObject x="30" y="60" width="340" height="480">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Georgia,serif;color:#12142a;">
+      <div style="font-size:34px;font-weight:700;line-height:1.2;">Alice's Adventures in Wonderland</div>
+      <div style="font-size:18px;margin-top:16px;opacity:.8;">Lewis Carroll</div>
+    </div>
+  </foreignObject>
+</svg>

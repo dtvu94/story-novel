@@ -5,6 +5,8 @@ import { IPC } from '../shared/ipc.js'
 // The renderer never imports Node/Electron directly (context isolation on).
 const api = {
   ping: () => ipcRenderer.invoke(IPC.ping),
+  openLibraryFolder: () => ipcRenderer.invoke(IPC.appOpenLibraryFolder),
+  libraryPath: () => ipcRenderer.invoke(IPC.appLibraryPath),
 
   library: {
     list: () => ipcRenderer.invoke(IPC.libraryList),

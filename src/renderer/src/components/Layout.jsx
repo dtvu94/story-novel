@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import Icon from './Icon'
+import { api } from '../lib/api'
 
 function SideItem({ to, icon, label }) {
   return (
@@ -24,6 +25,9 @@ export default function Layout() {
         <SideItem to="/" icon="library" label="Library" />
         <SideItem to="/import" icon="import" label="Import" />
         <div className="nav-spacer" />
+        <button className="nav-link" onClick={() => api.openLibraryFolder()} title="Open the folder where your books are stored">
+          <Icon name="file" size={17} /> Data folder
+        </button>
         <button className="btn primary" onClick={() => navigate('/studio/new')}>
           <Icon name="plus" size={16} /> New book
         </button>

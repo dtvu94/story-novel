@@ -1,8 +1,15 @@
 import { app, shell, protocol, net, BrowserWindow } from 'electron'
-import { join } from 'node:path'
+import { join, dirname } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { initStorage, resolveAssetUrl } from './storage.js'
 import { registerIpc } from './ipc.js'
+
+app.setName('Story Shelf')
+
+// Keep ALL app data — including Electron's own caches — next to the app instead
+// of under %APPDATA% on C:. Matches the library location in storage.js.
+const dataBase = app.isPackaged ? dirname(app.getPath('exe')) : process.cwd()
+app.setPath('userData', join(dataBase, 'data', 'app'))
 
 // Custom scheme so the renderer can display images stored inside book folders,
 // e.g. <img src="asset://book/<id>/assets/cover.jpg">.

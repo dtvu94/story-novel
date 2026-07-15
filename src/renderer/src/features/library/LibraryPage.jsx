@@ -8,7 +8,7 @@ import Icon from '../../components/Icon'
 export default function LibraryPage() {
   const navigate = useNavigate()
   const {
-    entries, loading, load,
+    entries, loading, load, deleteBook,
     query, setQuery, activeTags, toggleTag,
     sort, setSort, view, setView, clearFilters
   } = useLibrary()
@@ -25,6 +25,11 @@ export default function LibraryPage() {
 
   const open = (entry) => navigate(`/read/${entry.id}`)
   const edit = (entry) => navigate(`/studio/${entry.id}`)
+  const remove = (entry) => {
+    if (window.confirm(`Delete "${entry.title}" and all its chapters? This cannot be undone.`)) {
+      deleteBook(entry.id)
+    }
+  }
   const hasFilters = query || activeTags.length
 
   return (
@@ -109,11 +114,15 @@ export default function LibraryPage() {
       {!loading && visible.length > 0 && (
         view === 'grid' ? (
           <div className="book-grid">
-            {visible.map((e) => <BookCard key={e.id} entry={e} onOpen={open} onEdit={edit} />)}
+            {visible.map((e) => (
+              <BookCard key={e.id} entry={e} onOpen={open} onEdit={edit} onDelete={remove} />
+            ))}
           </div>
         ) : (
           <div className="book-list">
-            {visible.map((e) => <BookRow key={e.id} entry={e} onOpen={open} onEdit={edit} />)}
+            {visible.map((e) => (
+              <BookRow key={e.id} entry={e} onOpen={open} onEdit={edit} onDelete={remove} />
+            ))}
           </div>
         )
       )}
