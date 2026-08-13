@@ -24,9 +24,13 @@ if (process.platform === 'linux') {
   }
   if (!hasRenderNode) {
     app.disableHardwareAcceleration()
-    // Native Wayland presentation needs GPU buffers and can silently fail to
-    // show the window without them; the Xwayland/X11 software path is reliable.
-    app.commandLine.appendSwitch('ozone-platform', 'x11')
+    // Native Wayland presentation needs GPU buffers and silently fails to show
+    // the window without them; the Xwayland/X11 software path is reliable.
+    // The hint env var is read during display init (after this script runs) —
+    // appendSwitch('ozone-platform', …) would be applied too late.
+    if (!process.env.ELECTRON_OZONE_PLATFORM_HINT) {
+      process.env.ELECTRON_OZONE_PLATFORM_HINT = 'x11'
+    }
   }
 }
 
