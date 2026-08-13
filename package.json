@@ -25,14 +25,19 @@
     "rehype-sanitize": "^6.0.0",
     "@uiw/react-md-editor": "^4.0.4",
     "jszip": "^3.10.1",
-    "fast-xml-parser": "^4.5.0",
+    "fast-xml-parser": "^5.7.0",
     "cheerio": "^1.0.0"
   },
   "devDependencies": {
-    "electron": "^33.2.0",
-    "electron-vite": "^2.3.0",
-    "electron-builder": "^25.1.8",
-    "vite": "^5.4.8",
+    "electron": "^39.8.10",
+    "electron-vite": "^3.1.0",
+    "electron-builder": "^26.15.3",
+    "vite": "^6.4.3",
     "@vitejs/plugin-react": "^4.3.2"
+  },
+  "allowScripts": {
+    "electron@39.8.10": true,
+    "electron-winstaller@5.4.0": true,
+    "esbuild@0.25.12": true
   }
 }
