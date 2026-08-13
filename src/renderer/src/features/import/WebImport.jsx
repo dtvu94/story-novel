@@ -1,6 +1,42 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { api } from '../../lib/api'
 import Icon from '../../components/Icon'
+
+/** Live progress for the long-running steps (TOC listing, chapter fetching). */
+function ImportProgress({ progress }) {
+  const { phase, done = 0, total = 0, failed = 0, found = 0, title } = progress
+  if (phase === 'toc') {
+    return (
+      <div className="import-progress">
+        <div className="bar indeterminate">
+          <span />
+        </div>
+        <div className="progress-line">
+          <span>Reading chapter list…</span>
+          <span className="muted">{found ? `${found} chapters found` : ''}</span>
+        </div>
+      </div>
+    )
+  }
+
+  const pct = total ? Math.round((done / total) * 100) : 0
+  const label =
+    phase === 'saving' ? 'Saving book…' : phase === 'cover' ? 'Downloading cover…' : 'Fetching chapters…'
+  return (
+    <div className="import-progress">
+      <div className="bar">
+        <span style={{ width: `${pct}%` }} />
+      </div>
+      <div className="progress-line">
+        <span>
+          {label} <strong>{done}</strong> / {total} ({pct}%)
+          {failed > 0 && <span className="failed"> · {failed} failed</span>}
+        </span>
+        <span className="muted current">{phase === 'chapters' ? title || '' : ''}</span>
+      </div>
+    </div>
+  )
+}
 
 export default function WebImport({ onDone }) {
   const [url, setUrl] = useState('')
@@ -9,6 +45,13 @@ export default function WebImport({ onDone }) {
   const [busy, setBusy] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
+  const [progress, setProgress] = useState(null)
+
+  // Imports run for minutes; the main process pushes a step-by-step update.
+  useEffect(() => {
+    if (!window.api) return undefined // opened in a plain browser: no backend to listen to
+    return api.import.onProgress((p) => setProgress(p.phase === 'idle' ? null : p))
+  }, [])
 
   const doPreview = async () => {
     if (!url.trim()) return
@@ -16,6 +59,7 @@ export default function WebImport({ onDone }) {
     setError('')
     setResult(null)
     setPreview(null)
+    setProgress(null)
     try {
       const p = await api.import.urlPreview(url.trim())
       setPreview(p)
@@ -26,6 +70,7 @@ export default function WebImport({ onDone }) {
       setError(String(e?.message || e))
     } finally {
       setBusy(false)
+      setProgress(null)
     }
   }
 
@@ -40,6 +85,7 @@ export default function WebImport({ onDone }) {
   const doImport = async () => {
     setBusy(true)
     setError('')
+    setProgress({ phase: 'chapters', done: 0, total: chosen.length, failed: 0 })
     try {
       const res = await api.import.urlChapters({
         url: preview.url,
@@ -54,6 +100,7 @@ export default function WebImport({ onDone }) {
       setError(String(e?.message || e))
     } finally {
       setBusy(false)
+      setProgress(null)
     }
   }
 
@@ -77,6 +124,8 @@ export default function WebImport({ onDone }) {
       </p>
 
       {error && <p style={{ color: 'var(--danger)' }}>{error}</p>}
+
+      {busy && progress && <ImportProgress progress={progress} />}
 
       {preview && !result && (
         <div style={{ marginTop: 10 }}>
@@ -126,9 +175,23 @@ export default function WebImport({ onDone }) {
       {result?.ok && (
         <div className="import-results" style={{ marginTop: 16 }}>
           <div className="res">
-            <span className="dot ok" />
-            <span>Imported <strong>{result.title}</strong> · {result.chapters} chapters</span>
+            <span className={`dot ${result.blocked ? 'err' : 'ok'}`} />
+            <span>
+              Imported <strong>{result.title}</strong> · {result.chapters}
+              {result.total ? ` of ${result.total}` : ''} chapters
+              {result.failed > 0 && <span className="failed"> · {result.failed} failed to fetch</span>}
+            </span>
           </div>
+          {result.blocked && (
+            <div className="res blocked-note">
+              <span>
+                <strong>Stopped early — the site blocked us.</strong> {result.blocked}
+                <br />
+                The chapters fetched so far are saved. Wait until the block expires, then import the
+                remaining chapters into a new book (deselect the ones you already have).
+              </span>
+            </div>
+          )}
         </div>
       )}
     </div>

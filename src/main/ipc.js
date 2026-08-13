@@ -2,6 +2,7 @@ import { ipcMain, dialog, shell, BrowserWindow } from 'electron'
 import fs from 'node:fs/promises'
 import * as cheerio from 'cheerio'
 import { IPC } from '../shared/ipc.js'
+import { newChapter } from '../shared/model.js'
 import * as store from './storage.js'
 import { importEpubBuffer } from './importers/epub.js'
 import { importTextFile } from './importers/text.js'
@@ -30,6 +31,21 @@ async function htmlToMarkdownWithImages(html, bookId, baseUrl) {
 }
 
 const ownerWindow = (e) => BrowserWindow.fromWebContents(e.sender)
+
+// Persist a long web import every N chapters instead of only at the end.
+const SAVE_EVERY = 25
+
+/**
+ * Progress sender for the window that started an import. Web imports run for
+ * minutes (sites are fetched politely, one chapter at a time), so the renderer
+ * gets a push per step instead of waiting on the single invoke() promise.
+ * Silently drops events if the window went away mid-import.
+ */
+function progressReporter(e) {
+  return (patch) => {
+    if (!e.sender.isDestroyed()) e.sender.send(IPC.importProgress, patch)
+  }
+}
 
 function splitExt(name) {
   const dot = name.lastIndexOf('.')
@@ -126,13 +142,18 @@ export function registerIpc() {
   })
 
   // ---- Web import (adapter/plugin based) ----
-  ipcMain.handle(IPC.importUrlPreview, async (_e, url) => {
+  ipcMain.handle(IPC.importUrlPreview, async (e, url) => {
+    const report = progressReporter(e)
     const adapter = resolveAdapter(url)
-    const meta = await adapter.fetchMeta(url)
+    // Listing a table of contents can itself take many paged requests.
+    report({ phase: 'toc', found: 0 })
+    const meta = await adapter.fetchMeta(url, (found) => report({ phase: 'toc', found }))
+    report({ phase: 'idle' })
     return { adapterId: adapter.id, adapterName: adapter.name, url, ...meta }
   })
 
-  ipcMain.handle(IPC.importUrlChapters, async (_e, payload) => {
+  ipcMain.handle(IPC.importUrlChapters, async (e, payload) => {
+    const report = progressReporter(e)
     const adapter = resolveAdapter(payload.url)
     const book = await store.createBook({
       title: payload.title || 'Web import',
@@ -140,17 +161,36 @@ export function registerIpc() {
       source: { type: 'import-web', url: payload.url, site: adapter.id }
     })
     const chapters = []
+    const total = (payload.chapters || []).length
+    let failed = 0
+    let blocked = null
+    report({ phase: 'chapters', done: 0, total, failed: 0 })
     for (const ch of payload.chapters || []) {
+      let title = ch.title || `Chapter ${chapters.length + 1}`
       try {
         const fetched = await adapter.fetchChapter(ch.url)
         const markdown = await htmlToMarkdownWithImages(fetched.html, book.id, ch.url)
-        chapters.push({ title: ch.title || fetched.title || `Chapter ${chapters.length + 1}`, markdown })
+        title = ch.title || fetched.title || title
+        chapters.push(newChapter({ title, markdown }))
       } catch (err) {
-        chapters.push({ title: ch.title || 'Chapter', markdown: `*(Failed to fetch: ${err?.message || err})*` })
+        // A ban/rate-limit applies to every remaining chapter too: stop now and
+        // keep what we have. Carrying on would just deepen the block.
+        if (err?.blocked) {
+          blocked = String(err.message || err)
+          break
+        }
+        failed++
+        chapters.push(
+          newChapter({ title: ch.title || 'Chapter', markdown: `*(Failed to fetch: ${err?.message || err})*` })
+        )
       }
+      // Checkpoint so a long import that dies late keeps its chapters.
+      if (chapters.length % SAVE_EVERY === 0) await store.saveBook({ ...book, chapters })
+      report({ phase: 'chapters', done: chapters.length, total, failed, title })
     }
     let cover
-    if (payload.cover) {
+    if (payload.cover && !blocked) {
+      report({ phase: 'cover', done: chapters.length, total, failed })
       try {
         const { data, ext } = await fetchImage(payload.cover)
         cover = await store.saveAsset(book.id, data, ext, 'cover')
@@ -158,8 +198,18 @@ export function registerIpc() {
         /* ignore cover failure */
       }
     }
+    report({ phase: 'saving', done: chapters.length, total, failed })
     const saved = await store.saveBook({ ...book, chapters, ...(cover ? { cover } : {}) })
-    return { ok: true, id: saved.id, title: saved.title, chapters: saved.chapters.length }
+    report({ phase: 'idle' })
+    return {
+      ok: true,
+      id: saved.id,
+      title: saved.title,
+      chapters: saved.chapters.length,
+      total,
+      failed,
+      blocked
+    }
   })
 
   // ---- Portable book export / import (folder based) ----

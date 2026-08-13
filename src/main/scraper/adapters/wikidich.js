@@ -22,7 +22,10 @@ import { fetchText, throttleHost } from '../fetch.js'
 // least DELAY_MS apart (see throttleHost), covers and images included.
 
 const HOSTS = ['wikidich', 'wikicv']
-const DELAY_MS = 500
+// The site sits behind Cloudflare and bans IPs that pull hundreds of chapters
+// quickly (observed: Cloudflare error 1006 mid-import). 500ms was too hot for
+// book-length imports; ~2s is slow but survives a multi-thousand-chapter run.
+const DELAY_MS = 2000
 const TOC_PAGE_CAP = 100 // safety stop: 100 pages ≈ 50k chapters
 
 const sha256 = (s) => createHash('sha256').update(s, 'utf8').digest('hex')
@@ -93,7 +96,7 @@ export const wikidichAdapter = {
     }
   },
 
-  async fetchMeta(url) {
+  async fetchMeta(url, onChapterCount) {
     let pageUrl = url
     let html = await politeFetch(pageUrl)
     if (!html.includes('loadBookIndex(')) {
@@ -128,6 +131,8 @@ export const wikidichAdapter = {
           chapters.push({ title: $$(el).text().trim(), url: chapterUrl })
         }
       }
+      // Long tables of contents span many paged requests — report as we go.
+      onChapterCount?.(chapters.length)
       if (links.length < params.size) break
     }
     return { title, author, cover, chapters }

@@ -46,7 +46,13 @@ const api = {
   import: {
     files: (paths) => ipcRenderer.invoke(IPC.importFiles, paths),
     urlPreview: (url) => ipcRenderer.invoke(IPC.importUrlPreview, url),
-    urlChapters: (payload) => ipcRenderer.invoke(IPC.importUrlChapters, payload)
+    urlChapters: (payload) => ipcRenderer.invoke(IPC.importUrlChapters, payload),
+    /** Subscribe to web-import progress. Returns an unsubscribe function. */
+    onProgress: (cb) => {
+      const listener = (_e, data) => cb(data)
+      ipcRenderer.on(IPC.importProgress, listener)
+      return () => ipcRenderer.removeListener(IPC.importProgress, listener)
+    }
   }
 }
 

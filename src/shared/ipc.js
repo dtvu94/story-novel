@@ -27,6 +27,8 @@ export const IPC = {
 
   importUrlPreview: 'import:urlPreview',
   importUrlChapters: 'import:urlChapters',
+  // main -> renderer push channel (progress while a web import runs)
+  importProgress: 'import:progress',
 
   libraryExport: 'library:export',
   libraryImport: 'library:import'
