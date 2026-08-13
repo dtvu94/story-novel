@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Read(//home/vu/.claude/jobs/d7330710/tmp/**)",
+      "Bash(node /home/vu/.claude/jobs/d7330710/tmp/wikidich-test.mjs)",
+      "Read(//dev/dri/**)",
+      "Read(//dev/**)",
+      "Bash(ELECTRON_DISABLE_SANDBOX=1 timeout 25 npm run dev)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(xargs -r kill)",
+      "Bash(head -40 /home/vu/.claude/jobs/d7330710/tmp/dev-check.log)",
+      "Bash(npm run *)",
+      "Bash(pkill -f electron-vite)",
+      "Bash(pkill -f 'story-novel/node_modules/electron/dist/electron')",
+      "Bash(pkill -f 'electron[-]vite dev')",
+      "Bash(pkill -f 'story[-]novel/node_modules/electron/dist')",
+      "Bash(which wmctrl *)",
+      "Read(//run/user/1000/**)",
+      "Bash(export DISPLAY=:0 XAUTHORITY=/run/user/1000/.mutter-Xwaylandauth.AIR0T3)",
+      "Bash(xwininfo -root -children)",
+      "Bash(xwininfo -root -tree)",
+      "Bash(pkill -9 -f 'story[-]novel/node_modules/electron/dist')",
+      "Bash(DISPLAY=:0 XAUTHORITY=/run/user/1000/.mutter-Xwaylandauth.AIR0T3 WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/1000 ELECTRON_OZONE_PLATFORM_HINT=x11 ELECTRON_DISABLE_SANDBOX=1 npm run dev)",
+      "Bash(env -u ELECTRON_RUN_AS_NODE DISPLAY=:0 XAUTHORITY=/run/user/1000/.mutter-Xwaylandauth.AIR0T3 WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/1000 ELECTRON_OZONE_PLATFORM_HINT=x11 ELECTRON_DISABLE_SANDBOX=1 npm run dev)"
+    ]
+  }
+}

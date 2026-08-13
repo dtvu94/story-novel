@@ -1,5 +1,6 @@
 import { app, shell, protocol, net, BrowserWindow } from 'electron'
 import { join, dirname } from 'node:path'
+import { readdirSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
 import { initStorage, resolveAssetUrl } from './storage.js'
 import { registerIpc } from './ipc.js'
@@ -10,6 +11,24 @@ app.setName('Story Shelf')
 // of under %APPDATA% on C:. Matches the library location in storage.js.
 const dataBase = app.isPackaged ? dirname(app.getPath('exe')) : process.cwd()
 app.setPath('userData', join(dataBase, 'data', 'app'))
+
+// Linux VMs / remote sessions often have no GPU render node (/dev/dri/renderD*).
+// Chromium's GPU process then crash-loops and the window may never paint, so
+// fall back to software rendering when none is present.
+if (process.platform === 'linux') {
+  let hasRenderNode = false
+  try {
+    hasRenderNode = readdirSync('/dev/dri').some((name) => name.startsWith('renderD'))
+  } catch {
+    /* no /dev/dri at all */
+  }
+  if (!hasRenderNode) {
+    app.disableHardwareAcceleration()
+    // Native Wayland presentation needs GPU buffers and can silently fail to
+    // show the window without them; the Xwayland/X11 software path is reliable.
+    app.commandLine.appendSwitch('ozone-platform', 'x11')
+  }
+}
 
 // Custom scheme so the renderer can display images stored inside book folders,
 // e.g. <img src="asset://book/<id>/assets/cover.jpg">.
@@ -36,6 +55,10 @@ function createWindow() {
   })
 
   mainWindow.on('ready-to-show', () => mainWindow.show())
+  // Safety net: on GPU-less VMs the first-paint signal may never arrive.
+  setTimeout(() => {
+    if (!mainWindow.isDestroyed() && !mainWindow.isVisible()) mainWindow.show()
+  }, 2000)
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
